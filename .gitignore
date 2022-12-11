@@ -1,0 +1,9 @@
+.git
+code/pths
+code/trained_models
+code/wandb
+code/__pycache__
+code/model.py
+code/loss.py
+code/east_dataset.py
+code/detect.py
