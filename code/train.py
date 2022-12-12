@@ -68,10 +68,10 @@ def parse_args():
     return args
 
 
-def do_training(data_dir, model_dir, device, image_size, input_size, num_workers, batch_size,
+def do_training(seed, data_dir, model_dir, device, image_size, input_size, num_workers, batch_size,
                 learning_rate, max_epoch, save_interval):
     
-    seed_everything(args.seed)
+    seed_everything(seed)
 
     dataset = SceneTextDataset(data_dir, split='train', image_size=image_size, crop_size=input_size)
     dataset = EASTDataset(dataset)
@@ -142,9 +142,7 @@ def do_training(data_dir, model_dir, device, image_size, input_size, num_workers
                     'Angle_loss': angle_loss,
                     'IoU_loss': iou_loss
                     })
-        # pth = wandb.Artifact('pth', type='pth')
-        # pth.add_file('/opt/ml/code/trained_models/latest.pth')
-        # wandb.log_artifact(pth)
+        
         wandb.watch(model)
 
 
