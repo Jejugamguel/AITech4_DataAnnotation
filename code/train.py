@@ -15,6 +15,9 @@ from east_dataset import EASTDataset
 from dataset import SceneTextDataset
 from model import EAST
 import wandb
+import numpy as np
+import random
+
 wandb.login()
 wandb.init(
     project='OCR_project',
@@ -28,14 +31,24 @@ wandb.init(
 
 config = wandb.config
 
+def seed_everything(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)  # if use multi-GPU
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    np.random.seed(seed)
+    random.seed(seed)
+
 def parse_args():
     parser = ArgumentParser()
 
     # Conventional args
+    parser.add_argument('--seed', type=int, default=42, help='random seed (default: 42)')
     parser.add_argument('--data_dir', type=str,
                         default=os.environ.get('SM_CHANNEL_TRAIN', '/opt/ml//input/data/ICDAR17_Korean'))
     parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_MODEL_DIR',
-                                                                        '/opt/ml/level2_dataannotation_cv-level2-cv-03/code/trained_models'))
+                                '/opt/ml/level2_dataannotation_cv-level2-cv-03/code/trained_models'))
 
     parser.add_argument('--device', default='cuda' if cuda.is_available() else 'cpu')
     parser.add_argument('--num_workers', type=int, default=4)   
@@ -57,6 +70,9 @@ def parse_args():
 
 def do_training(data_dir, model_dir, device, image_size, input_size, num_workers, batch_size,
                 learning_rate, max_epoch, save_interval):
+    
+    seed_everything(args.seed)
+
     dataset = SceneTextDataset(data_dir, split='train', image_size=image_size, crop_size=input_size)
     dataset = EASTDataset(dataset)
     num_batches = math.ceil(len(dataset) / batch_size)
