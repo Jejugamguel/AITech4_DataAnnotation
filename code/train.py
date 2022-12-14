@@ -171,9 +171,6 @@ def do_training(seed, data_dir, model_dir, device, image_size, input_size, num_w
                 val_epoch_angle_loss += extra_info['angle_loss']
                 val_epoch_iou_loss += extra_info['iou_loss']
                 
-                pred_score_map = extra_info['score_map']
-                pred_geo_map = extra_info['geo_map']
-                
                 pbar.update(1)
                 val_dict = {
                     'Cls loss': val_epoch_cls_loss/valid_num_batches, 'Angle loss': val_epoch_angle_loss/valid_num_batches,
