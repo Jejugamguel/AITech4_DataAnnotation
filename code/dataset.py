@@ -1,7 +1,7 @@
 import os.path as osp
 import math
 import json
-from PIL import Image
+from PIL import Image, ImageOps
 
 import torch
 import numpy as np
@@ -346,6 +346,8 @@ def poly_to_rect(veritces_poly):
 
 
 
+
+
 class SceneTextDataset(Dataset):
     def __init__(self, root_dir, split='train', image_size=1024, crop_size=512, color_jitter=True,
                  normalize=True):
@@ -372,15 +374,16 @@ class SceneTextDataset(Dataset):
                 vertices.append(np.array(np.round(word_info['points'])).flatten())
                 labels.append(int(not word_info['illegibility']))
 
-            elif 4 < len(word_info['points']) <= 8: 
-                poly = poly_to_rect(np.array(np.round(word_info['points'])))
-                vertices.append(poly)
-                labels.append(int(not word_info['illegibility']))
+            # elif 4 < len(word_info['points']) <= 8: 
+            #     poly = poly_to_rect(np.array(np.round(word_info['points'])))
+            #     vertices.append(poly)
+            #     labels.append(int(not word_info['illegibility']))
 
         vertices, labels = np.array(vertices, dtype=np.float32), np.array(labels, dtype=np.int64)
         vertices, labels = filter_vertices(vertices, labels, ignore_under=10, drop_under=1)
 
         image = Image.open(image_fpath)
+        image = ImageOps.exif_transpose(image)
         image, vertices = resize_img(image, vertices, self.image_size)
         image, vertices = adjust_height(image, vertices)
         image, vertices = rotate_img(image, vertices)
