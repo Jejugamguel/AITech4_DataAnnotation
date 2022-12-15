@@ -107,12 +107,12 @@ def do_training(seed, data_dir, model_dir, device, image_size, input_size, num_w
     train_dataset = SceneTextDataset(f'{data_dir}/train_image', split='train', image_size=image_size, crop_size=input_size)
     train_dataset = EASTDataset(train_dataset)
     train_num_batches = math.ceil(len(train_dataset) / batch_size)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, drop_last=True)
     
     valid_dataset = SceneTextDataset(f'{data_dir}/valid_image', split='valid', image_size=image_size, crop_size=input_size)
     valid_dataset = EASTDataset(valid_dataset)
     valid_num_batches = math.ceil(len(valid_dataset) / batch_size)
-    valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, drop_last=True)
     
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = EAST()
