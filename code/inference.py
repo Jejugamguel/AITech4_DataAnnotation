@@ -26,7 +26,7 @@ def parse_args():
 
     parser.add_argument('--device', default='cuda' if cuda.is_available() else 'cpu')
     parser.add_argument('--input_size', type=int, default=1024)
-    parser.add_argument('--batch_size', type=int, default=20)
+    parser.add_argument('--batch_size', type=int, default=24)
 
     args = parser.parse_args()
 
@@ -37,7 +37,8 @@ def parse_args():
 
 
 def do_inference(model, ckpt_fpath, data_dir, input_size, batch_size, split='public'):
-    model.load_state_dict(torch.load(ckpt_fpath, map_location='cpu'))
+    if ckpt_fpath is not None:
+        model.load_state_dict(torch.load(ckpt_fpath, map_location='cpu'))
     model.eval()
 
     image_fnames, by_sample_bboxes = [], []

@@ -220,6 +220,7 @@ def crop_img(img, vertices, labels, length):
         cnt += 1
         start_w = int(np.random.rand() * remain_w)
         start_h = int(np.random.rand() * remain_h)
+        # flag = is_cross_text([start_w, start_h], length, new_vertices[labels==1,:])
         flag = is_cross_text([start_w, start_h], length, new_vertices[:])
     box = (start_w, start_h, start_w + length, start_h + length)
     region = img.crop(box)
@@ -332,29 +333,18 @@ def filter_vertices(vertices, labels, ignore_under=0, drop_under=0):
 
     return new_vertices, new_labels
 
-# 4개 초과 점을 가지는 다각형에 대해, 해당 다각형을 포함하는 가장 큰 사각형을 그려 모든 글자를 포함시킴
-def poly_to_rect(veritces_poly):
-    length =  np.arange(len(veritces_poly))
-    min_x = np.min(veritces_poly[np.where((length % 2 == 0))])
-    max_x = np.max(veritces_poly[np.where((length % 2 == 0))])
-    min_y = np.min(veritces_poly[np.where((length % 2 == 1))])
-    max_y = np.max(veritces_poly[np.where((length % 2 == 1))])
-
-    veritces_rect = np.array([min_x,min_y,max_x,min_y,max_x,max_y,min_x,max_y])
-
-    return veritces_rect
-
-
 
 class SceneTextDataset(Dataset):
     def __init__(self, root_dir, split='train', image_size=1024, crop_size=512, color_jitter=True,
                  normalize=True):
-        with open(osp.join(root_dir, 'ufo/{}.json'.format(split)), 'r') as f:
+        # with open(osp.join(root_dir, 'ufo/{}.json'.format(split)), 'r') as f:
+        with open(osp.join('/opt/ml/input/data/ufo', '{}.json'.format(split)), 'r') as f:
             anno = json.load(f)
 
         self.anno = anno
         self.image_fnames = sorted(anno['images'].keys())
-        self.image_dir = osp.join(root_dir, 'images')
+        # self.image_dir = osp.join(root_dir, 'images')
+        self.image_dir = root_dir
 
         self.image_size, self.crop_size = image_size, crop_size
         self.color_jitter, self.normalize = color_jitter, normalize
@@ -368,22 +358,18 @@ class SceneTextDataset(Dataset):
 
         vertices, labels = [], []
         for word_info in self.anno['images'][image_fname]['words'].values():
-            if len(word_info['points']) == 4: 
+            if len(word_info['points']) == 4:
                 vertices.append(np.array(np.round(word_info['points'])).flatten())
                 labels.append(int(not word_info['illegibility']))
-
-            elif 4 < len(word_info['points']) <= 8: 
-                poly = poly_to_rect(np.array(np.round(word_info['points'])))
-                vertices.append(poly)
-                labels.append(int(not word_info['illegibility']))
-
+                
         vertices, labels = np.array(vertices, dtype=np.float32), np.array(labels, dtype=np.int64)
-        vertices, labels = filter_vertices(vertices, labels, ignore_under=10, drop_under=1)
 
+        vertices, labels = filter_vertices(vertices, labels, ignore_under=10, drop_under=1)
         image = Image.open(image_fpath)
         image, vertices = resize_img(image, vertices, self.image_size)
         image, vertices = adjust_height(image, vertices)
         image, vertices = rotate_img(image, vertices)
+        
         image, vertices = crop_img(image, vertices, labels, self.crop_size)
 
         if image.mode != 'RGB':
