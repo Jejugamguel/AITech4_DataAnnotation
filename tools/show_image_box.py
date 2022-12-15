@@ -10,8 +10,8 @@ import matplotlib.image as mpimg
 import matplotlib.patches as patches
 
 sample_num = 16
-img_path = '/opt/ml/input/data/dataset/images/'
-ann_path = '/opt/ml/input/data/dataset/ufo/'
+img_path = '/opt/ml/input/data/ICDAR17_All/images/'
+ann_path = '/opt/ml/input/data/ICDAR17_All/ufo/'
 pre_path = '/opt/ml/code/predictions/output.csv'
 
 with open(ann_path+'train.json', 'r') as f:
@@ -58,10 +58,11 @@ def show_img_with_predNgt(file_name, img_path):
 
 
 if __name__ == '__main__':
-    #show_file_name = '20210913_210859.jpeg'
-    #show_img_with_ann(file_name=show_file_name, img_path=img_path)
     for _ in range(sample_num):
-        show_file_name = random.choice(list(pred_info['images'].keys()))
-        show_img_with_predNgt(file_name=show_file_name, img_path=img_path)
+        show_file_name = random.choice(list(ann_info['images'].keys()))
+        show_img_with_ann(file_name=show_file_name, img_path=img_path)
+    #for _ in range(sample_num):
+    #    show_file_name = random.choice(list(pred_info['images'].keys()))
+    #    show_img_with_predNgt(file_name=show_file_name, img_path=img_path)
     
 #%%
